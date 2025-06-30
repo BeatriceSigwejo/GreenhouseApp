@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Greenhouse Control</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Feather Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-teal-50 to-lime-100">
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+      <!-- Login Form Card -->
+      <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
+        <!-- Header -->
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-gray-800">Welcome Back!</h1>
+          <p class="text-gray-500 mt-2">
+            Sign in to access the Greenhouse Dashboard
+          </p>
+        </div>
+
+        <!-- Error Message Display -->
+        <!-- This block will only appear if the server passes an 'error' variable -->
+        {% if error %}
+        <div
+          class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg"
+          role="alert"
+        >
+          <div class="flex">
+            <div>
+              <i data-feather="alert-circle" class="w-5 h-5 mr-3"></i>
+            </div>
+            <div>
+              <p class="font-bold">Login Failed</p>
+              <p>{{ error }}</p>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="POST" action="/login" class="space-y-6">
+          <!-- Username Input -->
+          <div>
+            <label for="username" class="sr-only">Username</label>
+            <div class="relative">
+              <div
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+              >
+                <i data-feather="user" class="h-5 w-5 text-gray-400"></i>
+              </div>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Username"
+              />
+            </div>
+          </div>
+
+          <!-- Password Input -->
+          <div>
+            <label for="password" class="sr-only">Password</label>
+            <div class="relative">
+              <div
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+              >
+                <i data-feather="lock" class="h-5 w-5 text-gray-400"></i>
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Password"
+              />
+
+              <button
+                type="button"
+                onclick="togglePassword()"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+              >
+                <i data-feather="eye" id="toggleEye"></i>
+              </button>
+            </div>
+            <div class="text-right text-sm">
+              <a href="/forgot" class="text-emerald-600 hover:underline"
+                >Forgot password?</a
+              >
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div>
+            <button
+              type="submit"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition"
+            >
+              Sign In
+            </button>
+          </div>
+        </form>
+
+        <!-- Footer Link to Register -->
+        <p class="text-center text-sm text-gray-500">
+          Don't have an account?
+          <a
+            href="/register"
+            class="font-medium text-emerald-600 hover:text-emerald-500"
+            >Register here</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // Initialize Feather Icons
+      feather.replace();
+    </script>
+    <script>
+      function togglePassword() {
+        const passwordInput = document.getElementById("password");
+        const toggleIcon = document.getElementById("toggleEye");
+
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          toggleIcon.setAttribute("data-feather", "eye-off");
+        } else {
+          passwordInput.type = "password";
+          toggleIcon.setAttribute("data-feather", "eye");
+        }
+
+        feather.replace(); // Refresh Feather icons
+      }
+
+      feather.replace();
+    </script>
+  </body>
+</html>
