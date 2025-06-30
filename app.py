@@ -13,14 +13,14 @@ import smtplib
 from email.mime.text import MIMEText                
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key' # For production, use a more secure, randomly generated key
+app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key_fallback')  # Fallback for local testing
 
 # Flask-Mail configuration (add this block)
-app.config['MAIL_SERVER'] = 'smtp.zoho.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'greenhousetz@fierylion.live'        # <-- your Gmail
-app.config['MAIL_PASSWORD'] = 'BhPp4aAneQYM'     # <-- your App password
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.zoho.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')     # <-- your App password
 
 mail = Mail(app)                                           # Initialize Flask-Mail
 s = URLSafeTimedSerializer(app.secret_key)                 # Token serializer for email verification
