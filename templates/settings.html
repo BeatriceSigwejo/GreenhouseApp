@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings - Greenhouse System</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Roboto", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #e6f4ea;
+        color: #155724;
+      }
+      .container {
+        display: flex;
+        max-width: 1000px;
+        margin: 20px auto;
+      }
+      .sidebar {
+        width: 250px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        height: fit-content;
+      }
+      .sidebar h2 {
+        color: #28a745;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+      }
+      .sidebar a {
+        display: block;
+        margin: 10px 0;
+        text-decoration: none;
+        color: #007bff;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+      .sidebar a:hover {
+        color: #28a745;
+      }
+      .main-content {
+        flex-grow: 1;
+        margin-left: 20px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #28a745;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      h3 {
+        color: #28a745;
+        margin-top: 30px;
+        border-bottom: 2px solid #28a745;
+        padding-bottom: 5px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+        max-width: 400px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d4edda;
+        border-radius: 5px;
+        font-size: 1em;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #28a745;
+        box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+      }
+      button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 1em;
+        transition: background-color 0.3s, transform 0.2s;
+        margin-right: 10px;
+      }
+      button:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+      }
+      .message,
+      .error {
+        margin: 15px 0;
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+      }
+      .message {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="sidebar">
+        <h2>Admin Menu</h2>
+        <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        <a href="{{ url_for('system_logs') }}">System Logs</a>
+        <a href="{{ url_for('admin_settings') }}">Settings</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      </div>
+      <div class="main-content">
+        <h1>Greenhouse System</h1>
+        <h3>Admin Settings</h3>
+        {% if message %}
+        <p class="message">{{ message }}</p>
+        {% endif %} {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <h3>Add User</h3>
+        <form action="{{ url_for('admin_settings') }}" method="POST">
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required />
+          </div>
+          <div class="form-group">
+            <label for="is_admin">Admin Status:</label>
+            <select id="is_admin" name="is_admin">
+              <option value="0">Non-Admin</option>
+              <option value="1">Admin</option>
+            </select>
+          </div>
+          <button type="submit" name="action" value="add_user">Add User</button>
+        </form>
+
+        <h3>Manage Existing Users</h3>
+        <form action="{{ url_for('admin_settings') }}" method="POST">
+          <div class="form-group">
+            <label for="manage_username">Select User:</label>
+            <select id="manage_username" name="username" required>
+              <option value="">-- Select User --</option>
+              {% for user in users %}
+              <option value="{{ user['username'] }}">
+                {{ user['username'] }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <button
+              type="submit"
+              name="action"
+              value="delete"
+              onclick="return confirm('Are you sure you want to delete this user?')"
+            >
+              Delete User
+            </button>
+            <button type="submit" name="action" value="toggle_admin">
+              Toggle Admin Status
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,299 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Greenhouse Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- This meta tag will refresh the page every 5 seconds -->
-    <meta http-equiv="refresh" content="5">
-
-    <!-- Tailwind CSS for modern styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Feather Icons for UI icons -->
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-
-    <!-- Chart.js for graphs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        /* Use the Inter font family for a cleaner look */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* A light gray background */
-        }
-        
-        /* Custom styles for status indicators */
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-
-        .status-ok {
-            background-color: #22c55e; /* green-500 */
-        }
-
-        .status-off {
-            background-color: #ef4444; /* red-500 */
-        }
-        
-        /* Animation for cards */
-        .card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
-    </style>
-</head>
-<body class="text-gray-800">
-
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+  </head>
+  <body class="bg-gray-100 font-sans">
     {% if logged_in %}
-    <!-- This entire section is shown only if the user is logged in -->
-    <div class="container mx-auto p-4 md:p-8">
+    <div class="container mx-auto p-4">
+      <header class="bg-green-600 text-white p-4 rounded-lg shadow-md mb-6">
+        <h1 class="text-2xl font-bold">Greenhouse Dashboard</h1>
+        <p>Real-time sensor data and system status.</p>
+      </header>
 
-        <!-- Header Section -->
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-emerald-700 flex items-center">
-                    <i data-feather="grid" class="mr-3"></i>Greenhouse Dashboard
-                </h1>
-                <p class="text-gray-500 mt-1">Real-time sensor data and system status.</p>
-            </div>
-            <div class="buttons mt-4 sm:mt-0 flex space-x-2">
-                <a href="/download" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors">
-                    <i data-feather="download" class="w-4 h-4 mr-2"></i>Download
-                </a>
-                <a href="/logout" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg flex items-center transition-colors">
-                    <i data-feather="log-out" class="w-4 h-4 mr-2"></i>Logout
-                </a>
-            </div>
-        </header>
+      <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+        <form
+          action="{{ url_for('dashboard') }}"
+          method="POST"
+          class="flex space-x-4"
+        >
+          <div>
+            <label
+              for="start_date"
+              class="block text-sm font-medium text-gray-700"
+              >Start Date:</label
+            >
+            <input
+              type="date"
+              id="start_date"
+              name="start_date"
+              value="{{ start_date or '' }}"
+              class="mt-1 p-2 border rounded-md"
+            />
+          </div>
+          <div>
+            <label
+              for="end_date"
+              class="block text-sm font-medium text-gray-700"
+              >End Date:</label
+            >
+            <input
+              type="date"
+              id="end_date"
+              name="end_date"
+              value="{{ end_date or '' }}"
+              class="mt-1 p-2 border rounded-md"
+            />
+          </div>
+          <div class="flex items-end">
+            <button
+              type="submit"
+              class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            >
+              Apply Filter
+            </button>
+          </div>
+        </form>
+      </div>
 
-        <!-- Main Status Cards Section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Overall System Status Card -->
-            <div class="card bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
-                <div class="p-3 rounded-full {{ 'bg-green-100' if latest.sensors == 1 else 'bg-red-100' }}">
-                    <i data-feather="activity" class="h-6 w-6 {{ 'text-green-600' if latest.sensors == 1 else 'text-red-600' }}"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm">System Status</p>
-                    <p class="text-xl font-semibold {{ 'text-green-600' if latest.sensors == 1 else 'text-red-600' }}">
-                        {{ 'Online' if latest.sensors == 1 else 'Offline' }}
-                    </p>
-                </div>
-            </div>
-            
-            <!-- Temperature Card -->
-            <div class="card bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
-                <div class="p-3 rounded-full bg-orange-100">
-                    <i data-feather="thermometer" class="h-6 w-6 text-orange-600"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm">Temperature</p>
-                    <p class="text-xl font-semibold">{{ latest.temp if latest else 'N/A' }} °C</p>
-                </div>
-            </div>
-
-            <!-- Light (LDR) Card -->
-            <div class="card bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
-                 <div class="p-3 rounded-full bg-yellow-100">
-                    <i data-feather="sun" class="h-6 w-6 text-yellow-600"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm">Light Intensity (LDR)</p>
-                    <p class="text-xl font-semibold">{{ latest.ldr if latest else 'N/A' }}</p>
-                </div>
-            </div>
-
-            <!-- Moisture Card -->
-            <div class="card bg-white p-6 rounded-xl shadow-md flex items-center space-x-4">
-                 <div class="p-3 rounded-full bg-sky-100">
-                    <i data-feather="droplet" class="h-6 w-6 text-sky-600"></i>
-                </div>
-                <div>
-                    <p class="text-gray-500 text-sm">Soil Moisture</p>
-                    <p class="text-xl font-semibold">{{ latest.moisture if latest else 'N/A' }}</p>
-                </div>
-            </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white p-4 rounded-lg shadow-md">
+          <form action="{{ url_for('download') }}" method="POST">
+            <input
+              type="hidden"
+              name="start_date"
+              value="{{ start_date or '' }}"
+            />
+            <input type="hidden" name="end_date" value="{{ end_date or '' }}" />
+            <button
+              type="submit"
+              class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 w-full"
+            >
+              Download
+            </button>
+          </form>
+          <a
+            href="{{ url_for('logout') }}"
+            class="block text-center mt-2 text-blue-500 hover:underline"
+            >Logout</a
+          >
         </div>
 
-        <!-- Temperature Graph -->
-        <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-8">
-            <h2 class="text-xl font-semibold mb-4">Temperature Trend (°C)</h2>
-            <div class="h-80">
-                <canvas id="temperatureChart"></canvas>
-            </div>
+        <div class="bg-white p-4 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold">System Status</h2>
+          <p
+            class="text-2xl {{ 'text-green-500' if latest.sensors == 1 else 'text-red-500' }}"
+          >
+            {{ 'Online' if latest.sensors == 1 else 'Offline' }}
+          </p>
         </div>
 
-        <!-- Data Log Table -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <h2 class="text-xl font-semibold p-6 border-b border-gray-200">Data History</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50 text-xs text-gray-700 uppercase tracking-wider">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">#</th>
-                            <th scope="col" class="px-6 py-3">Timestamp</th>
-                            <th scope="col" class="px-6 py-3 text-center">Temp (°C)</th>
-                            <th scope="col" class="px-6 py-3 text-center">LDR</th>
-                            <th scope="col" class="px-6 py-3 text-center">Moisture</th>
-                            <th scope="col" class="px-6 py-3 text-center">Pump</th>
-                            <th scope="col" class="px-6 py-3 text-center">Heater</th>
-                            <th scope="col" class="px-6 py-3 text-center">Fan</th>
-                            <th scope="col" class="px-6 py-3 text-center">Light</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in data %}
-                        <tr class="bg-white border-b hover:bg-gray-50">
-                            <td class="px-6 py-4 font-medium text-gray-900">{{ loop.index }}</td>
-                            <td class="px-6 py-4 text-gray-600">{{ entry.timestamp }}</td>
-                            <td class="px-6 py-4 text-center">{{ entry.temp }}</td>
-                            <td class="px-6 py-4 text-center">{{ entry.ldr }}</td>
-                            <td class="px-6 py-4 text-center">{{ entry.moisture }}</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="status-dot {{ 'status-ok' if entry.pump == 'ON' else 'status-off' }}"></span>{{ entry.pump }}
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="status-dot {{ 'status-ok' if entry.heater == 'ON' else 'status-off' }}"></span>{{ entry.heater }}
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="status-dot {{ 'status-ok' if entry.fan == 'ON' else 'status-off' }}"></span>{{ entry.fan }}
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="status-dot {{ 'status-ok' if entry.light == 'ON' else 'status-off' }}"></span>{{ entry.light }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                 {% if not data %}
-                    <p class="text-center text-gray-500 py-10">No data available.</p>
-                {% endif %}
-            </div>
+        <div class="bg-white p-4 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold">Temperature</h2>
+          <p class="text-2xl">{{ latest.temp if latest else 'N/A' }} °C</p>
         </div>
-    </div>
-    
-    {% else %}
-    <!-- This section is shown if the user is NOT logged in -->
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-xl shadow-md text-center max-w-md w-full">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                <i data-feather="lock" class="h-6 w-6 text-red-600"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-800 mt-6">Access Denied</h2>
-            <p class="text-gray-600 mt-2">You must be logged in to view the dashboard.</p>
-            <div class="buttons mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="/login" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">
-                    <i data-feather="log-in" class="w-5 h-5 mr-2"></i>Login
-                </a>
-                <a href="/register" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg flex items-center justify-center transition-colors">Register</a>
-            </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold">Light Intensity (LDR)</h2>
+          <p class="text-2xl">{{ latest.ldr if latest else 'N/A' }}</p>
         </div>
-    </div>
-    {% endif %}
 
-    <!-- This script tag is now wrapped in a conditional block to prevent JS errors -->
-    {% if logged_in and graph_timestamps %}
-    <script>
-        // Chart.js Temperature Graph
-        const timestamps = {{ graph_timestamps|tojson|safe }};
-        const temps = {{ graph_temps|tojson|safe }};
-        
-        const ctx = document.getElementById('temperatureChart').getContext('2d');
-        
-        // Gradient for the line chart fill
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
-        gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+        <div class="bg-white p-4 rounded-lg shadow-md">
+          <h2 class="text-lg font-semibold">Soil Moisture</h2>
+          <p class="text-2xl">{{ latest.moisture if latest else 'N/A' }}</p>
+        </div>
+      </div>
 
-        const temperatureChart = new Chart(ctx, {
+      <!-- Temperature Graph -->
+      <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+        <h2 class="text-lg font-semibold">Temperature Trend (°C)</h2>
+        <canvas id="tempChart" class="w-full h-64"></canvas>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h2 class="text-lg font-semibold">Data History</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border">
+            <thead>
+              <tr class="bg-gray-200">
+                <th class="px-4 py-2 border">No.</th>
+                <th class="px-4 py-2 border">Timestamp</th>
+                <th class="px-4 py-2 border">Temp (°C)</th>
+                <th class="px-4 py-2 border">LDR</th>
+                <th class="px-4 py-2 border">Moisture</th>
+                <th class="px-4 py-2 border">Pump</th>
+                <th class="px-4 py-2 border">Heater</th>
+                <th class="px-4 py-2 border">Fan</th>
+                <th class="px-4 py-2 border">Light</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in data %}
+              <tr>
+                <td class="px-4 py-2 border">{{ loop.index }}</td>
+                <td class="px-4 py-2 border">{{ entry.timestamp }}</td>
+                <td class="px-4 py-2 border">{{ entry.temp }}</td>
+                <td class="px-4 py-2 border">{{ entry.ldr }}</td>
+                <td class="px-4 py-2 border">{{ entry.moisture }}</td>
+                <td class="px-4 py-2 border">{{ entry.pump }}</td>
+                <td class="px-4 py-2 border">{{ entry.heater }}</td>
+                <td class="px-4 py-2 border">{{ entry.fan }}</td>
+                <td class="px-4 py-2 border">{{ entry.light }}</td>
+              </tr>
+              {% endfor %} {% if not data %}
+              <tr>
+                <td colspan="9" class="px-4 py-2 border text-center">
+                  No data available.
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if graph_timestamps %}
+      <script>
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        new Chart(ctx, {
             type: 'line',
             data: {
-                labels: timestamps.map(ts => new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })),
+                labels: {{ graph_timestamps | tojson }},
                 datasets: [{
-                    label: 'Temperature',
-                    data: temps,
-                    borderColor: '#10b981', // emerald-600
-                    backgroundColor: gradient,
-                    borderWidth: 2.5,
-                    pointBackgroundColor: '#10b981',
-                    pointBorderColor: '#ffffff',
-                    pointHoverBackgroundColor: '#ffffff',
-                    pointHoverBorderColor: '#10b981',
-                    pointRadius: 4,
-                    pointHoverRadius: 7,
-                    tension: 0.4,
-                    fill: true
+                    label: 'Temperature (°C)',
+                    data: {{ graph_temps | tojson }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
                 scales: {
-                    y: {
-                        beginAtZero: false,
-                        grid: {
-                            color: '#e5e7eb',
-                            drawBorder: false,
-                        },
-                        ticks: {
-                            padding: 10,
-                            callback: function(value) {
-                                return value + ' °C';
-                            }
-                        }
-                    },
                     x: {
-                        grid: {
-                            display: false,
-                        },
-                        ticks: {
-                            padding: 10,
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
+                        title: { display: true, text: 'Timestamp' }
                     },
-                    tooltip: {
-                        enabled: true,
-                        backgroundColor: '#1f2937', // gray-800
-                        titleFont: { size: 14, weight: 'bold' },
-                        bodyFont: { size: 12 },
-                        padding: 12,
-                        cornerRadius: 8,
-                        displayColors: false,
-                        callbacks: {
-                            label: function(context) {
-                                return `Temperature: ${context.parsed.y.toFixed(2)} °C`;
-                            }
-                        }
+                    y: {
+                        title: { display: true, text: 'Temperature (°C)' }
                     }
                 }
             }
         });
-    </script>
+      </script>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="container mx-auto p-4">
+      <div
+        class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md"
+      >
+        <h1 class="text-2xl font-bold">Access Denied</h1>
+        <p>You must be logged in to view the dashboard.</p>
+        <div class="mt-4">
+          <a
+            href="{{ url_for('login') }}"
+            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2"
+            >Login</a
+          >
+          <a
+            href="{{ url_for('register') }}"
+            class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+            >Register</a
+          >
+        </div>
+      </div>
+    </div>
     {% endif %}
-
-    <script>
-        // Initialize Feather Icons
-        // This is in a separate script tag so it runs on the 'Access Denied' page too
-        feather.replace();
-    </script>
-
-</body>
+  </body>
 </html>

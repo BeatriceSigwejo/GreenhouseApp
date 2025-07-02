@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Greenhouse System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e6f4ea;
+            color: #155724;
+        }
+        .container {
+            display: flex;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        .sidebar h2 {
+            color: #28a745;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .sidebar a {
+            display: block;
+            margin: 10px 0;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .sidebar a:hover {
+            color: #28a745;
+        }
+        .main-content {
+            flex-grow: 1;
+            margin-left: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #28a745;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #28a745;
+            margin-top: 30px;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #d4edda;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #28a745;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .welcome {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Greenhouse System</h2>
+            <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+            <a href="{{ url_for('system_logs') }}">System Logs</a>
+            <a href="{{ url_for('admin_settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+        <div class="main-content">
+            <h1>Greenhouse System</h1>
+            <p class="welcome">Welcome, {{ session.user }}!</p>
+
+            <h3>Registered Users</h3>
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Verified</th>
+                    <th>Is Admin</th>
+                </tr>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ 'Yes' if user.verified else 'No' }}</td>
+                    <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <h3>Download History</h3>
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Download Time</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                </tr>
+                {% for download in downloads %}
+                <tr>
+                    <td>{{ download.username }}</td>
+                    <td>{{ download.download_time }}</td>
+                    <td>{{ download.start_date or 'All' }}</td>
+                    <td>{{ download.end_date or 'All' }}</td>
+                </tr>
+                {% endfor %}
+                {% if not downloads %}
+                <tr><td colspan="4">No downloads available.</td></tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</body>
+</html>
